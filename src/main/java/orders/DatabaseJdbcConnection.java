@@ -105,12 +105,12 @@ class DatabaseJdbcConnection {
         conn.setAutoCommit(false);
         try {
             try {
-//5 создаю   заказ с Нулём  в сумме, чтобы зарезервировать номер заказа
+//5 создаю   заказ с Нулём  в total_sum, чтобы зарезервировать order_id
                       createOrder(tmpDate, client_id, 0);
 
-//6 достаю номер заказа из таблицы заказов
+//6 достаю order_id из таблицы orders
                 int order_id = getOrderId(client_id, date_delivery, 0);
-//7 заполняю корзину
+//7 заполняю basket
                 try (PreparedStatement prepStatement = conn.prepareStatement("INSERT INTO basket(product_id, order_id, client_id, price ) VALUES (?,?,?,?)")) {
                     do {
                         b = true;
@@ -121,7 +121,7 @@ class DatabaseJdbcConnection {
                         Double price = (Double) tmpList.get(1);
 
 
-//7-continue получив цену заканчиваю заполнять корзину
+//7-continue получив price заканчиваю заполнять basket
                         prepStatement.setInt(1, prodID);
                         prepStatement.setInt(2, order_id);
                         prepStatement.setInt(3, client_id);
@@ -142,7 +142,7 @@ class DatabaseJdbcConnection {
                                         total_sum = total_sum + rs.getDouble(1);
                                     }
                                 }
-// 10 устанавливаю сумму заказа - заказ оформяю полностью
+// 10 устанавливаю сумму заказа(total_sum) - заказ дооформляю полностью
                                 try (PreparedStatement statement = conn.prepareStatement("UPDATE orders set total_sum=" + total_sum +
                                         " WHERE orders.order_id=" + order_id + " AND client_id=" + client_id)) {
                                     statement.executeUpdate();
